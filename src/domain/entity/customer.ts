@@ -1,3 +1,7 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import CustomerCreatedEvent from "../event/customer/customer-created.event";
+import SendEmailWhenCustomerIsCreateHandler from "../event/customer/handler/send-email-when-customer-is-create.handler";
+import SendEmailWhenCreateIsAlterHandler from "../event/customer/handler/send-email-when-customer-is-alter.handler";
 import Address from "./address";
 
 export default class Customer {
@@ -6,11 +10,13 @@ export default class Customer {
     private _address!: Address;
     private _active: boolean = false;
     private _rewardPoints: number = 0;
-  
+    private _eventName: string ="CustomerCreatedEvent";
+
     constructor(id: string, name: string) {
       this._id = id;
       this._name = name;
       this.validate();
+      this.registerEventCreated();
     }
   
     get id(): string {
@@ -45,6 +51,7 @@ export default class Customer {
     
     changeAddress(address: Address) {
       this._address = address;
+      this.registerEventAlter();
     }
   
     isActive(): boolean {
@@ -69,5 +76,39 @@ export default class Customer {
     set Address(address: Address) {
       this._address = address;
     }
+
+    private registerEventCreated(): void {
+      const eventDispatcher  = new EventDispatcher();
+      const eventHandler = new SendEmailWhenCustomerIsCreateHandler();
+      eventDispatcher.register(this._eventName, eventHandler);
+      const customerCreatedEvent = new CustomerCreatedEvent({
+        name:this._eventName,
+        data:{
+            customer:{
+                id: this._id,
+                name: this.name,
+                adress: this.Address
+            }
+        }
+    });
+      eventDispatcher.notify(customerCreatedEvent);
+   }
+
+   private registerEventAlter(): void {
+    const eventDispatcher  = new EventDispatcher();
+    const eventHandler = new SendEmailWhenCreateIsAlterHandler();
+    eventDispatcher.register(this._eventName, eventHandler);
+    const customerCreatedEvent = new CustomerCreatedEvent({
+      name:this._eventName,
+      data:{
+          customer:{
+              id: this._id,
+              name: this.name,
+              adress: this.Address
+          }
+      }
+  });
+    eventDispatcher.notify(customerCreatedEvent);
+ }
   }
   

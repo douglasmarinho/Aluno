@@ -5,6 +5,7 @@ export default class SendEmailWhenCreateIsCreateHandler implements EventHandlerI
     
     handler(event: CustomerCreatedEvent): void {
        console.log(`Esse é o primeiro console.log do evento: CustomerCreated`);
+       this.handler2(event);
     }
 
     handler2(event: CustomerCreatedEvent): void {
