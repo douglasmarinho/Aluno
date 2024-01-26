@@ -1,9 +1,9 @@
 import EventHandlerInterface from "../../@shared/event-handler.interface";
-import CustomerCreatedEvent from "../customer-created.event";
+import CustomerAlterEvent from "../customer-alter.event";
 
-export default class SendEmailWhenCreateIsAlterHandler implements EventHandlerInterface<CustomerCreatedEvent>{
+export default class SendEmailWhenCustomerIsAlterHandler implements EventHandlerInterface<CustomerAlterEvent>{
     
-    handler(event: CustomerCreatedEvent): void {
+    handler(event: CustomerAlterEvent): void {
        console.log(`Endereço do cliente: ${event.eventData.data.customer.id}, ${event.eventData.data.customer.name} alterado para: ${event.eventData.data.customer.adress}`);
     }
 

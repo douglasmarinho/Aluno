@@ -1,7 +1,9 @@
 import EventDispatcher from "../event/@shared/event-dispatcher";
 import CustomerCreatedEvent from "../event/customer/customer-created.event";
+import CustomerAlterEvent from "../event/customer/customer-alter.event";
 import SendEmailWhenCustomerIsCreateHandler from "../event/customer/handler/send-email-when-customer-is-create.handler";
-import SendEmailWhenCreateIsAlterHandler from "../event/customer/handler/send-email-when-customer-is-alter.handler";
+import SendEmailWhenCustomerIsAlterHandler from "../event/customer/handler/send-email-when-customer-is-alter.handler";
+import ConfirmRegistrationCustomerIsCreateHandler from "../event/customer/handler/confirm-registration-customer-is-create.handler"
 import Address from "./address";
 
 export default class Customer {
@@ -10,13 +12,12 @@ export default class Customer {
     private _address!: Address;
     private _active: boolean = false;
     private _rewardPoints: number = 0;
-    private _eventName: string ="CustomerCreatedEvent";
 
     constructor(id: string, name: string) {
       this._id = id;
       this._name = name;
       this.validate();
-      this.registerEventCreated();
+      this.registerEventCreated("CustomerCreatedEvent");
     }
   
     get id(): string {
@@ -51,7 +52,7 @@ export default class Customer {
     
     changeAddress(address: Address) {
       this._address = address;
-      this.registerEventAlter();
+      this.registerEventAlter("CustomerAlterEvent");
     }
   
     isActive(): boolean {
@@ -77,12 +78,14 @@ export default class Customer {
       this._address = address;
     }
 
-    private registerEventCreated(): void {
+    private registerEventCreated(eventName: string): void {
       const eventDispatcher  = new EventDispatcher();
       const eventHandler = new SendEmailWhenCustomerIsCreateHandler();
-      eventDispatcher.register(this._eventName, eventHandler);
+      eventDispatcher.register(eventName, eventHandler);
+      const eventHandlerConfirm = new ConfirmRegistrationCustomerIsCreateHandler();
+      eventDispatcher.register(eventName, eventHandlerConfirm);
       const customerCreatedEvent = new CustomerCreatedEvent({
-        name:this._eventName,
+        name: eventName,
         data:{
             customer:{
                 id: this._id,
@@ -94,12 +97,12 @@ export default class Customer {
       eventDispatcher.notify(customerCreatedEvent);
    }
 
-   private registerEventAlter(): void {
+   private registerEventAlter(eventName: string): void {
     const eventDispatcher  = new EventDispatcher();
-    const eventHandler = new SendEmailWhenCreateIsAlterHandler();
-    eventDispatcher.register(this._eventName, eventHandler);
-    const customerCreatedEvent = new CustomerCreatedEvent({
-      name:this._eventName,
+    const eventHandler = new SendEmailWhenCustomerIsAlterHandler();
+    eventDispatcher.register(eventName, eventHandler);
+    const customerAlterEvent = new CustomerAlterEvent({
+      name: eventName,
       data:{
           customer:{
               id: this._id,
@@ -108,7 +111,7 @@ export default class Customer {
           }
       }
   });
-    eventDispatcher.notify(customerCreatedEvent);
+    eventDispatcher.notify(customerAlterEvent);
  }
   }
   
